@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{% block title %}Система голосования{% endblock %}</title>
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+</head>
+<body>
+    <div class="container">
+        <h1>Система голосования</h1>
+        
+        <nav style="text-align: center; margin-bottom: 30px; border-bottom: 1px solid #ddd; padding-bottom: 15px;">
+            <a href="/api/web/" class="btn">Категории</a>
+            <a href="/api/web/category/create/" class="btn btn-success">Добавить</a>
+            <a href="/admin/" class="btn">Админка</a>
+            <a href="/api/" class="btn">API</a>
+            {% if user.is_authenticated %}
+                <span style="margin: 0 10px; color: #2f3640;">Пользователь: {{ user.username }}</span>
+                <a href="/accounts/logout/" class="btn btn-danger">Выход</a>
+            {% else %}
+                <a href="/accounts/login/" class="btn">Вход</a>
+            {% endif %}
+        </nav>
+        
+        {% if messages %}
+            {% for message in messages %}
+                <div class="alert alert-{{ message.tags }}">
+                    {{ message }}
+                </div>
+            {% endfor %}
+        {% endif %}
+        
+        {% block content %}{% endblock %}
+    </div>
+</body>
+</html>

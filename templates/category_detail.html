@@ -1,0 +1,87 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ category.name }} - Система голосования{% endblock %}
+
+{% block content %}
+<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+    <div>
+        <h1>{{ category.name }}</h1>
+        <p>{{ category.description|default:"Описание отсутствует" }}</p>
+    </div>
+    <div>
+        <a href="{% url 'voting_app:category_list' %}" class="btn">← Назад к категориям</a>
+        <a href="{% url 'voting_app:category_edit' category.id %}" class="btn btn-warning">Редактировать</a>
+    </div>
+</div>
+
+<div class="stats" style="margin-bottom: 30px;">
+    <div class="stat">
+        <div class="stat-number">{{ nominations.count }}</div>
+        <div>номинаций</div>
+    </div>
+    <div class="stat">
+        <div class="stat-number">{{ category.get_total_votes }}</div>
+        <div>голосов</div>
+    </div>
+</div>
+
+<h2>Номинации</h2>
+
+<div style="margin-bottom: 20px;">
+    <a href="{% url 'voting_app:nomination_create' category.id %}" class="btn btn-success">+ Добавить номинацию</a>
+</div>
+
+<div class="grid">
+    {% for nomination in nominations %}
+    <div class="nomination-item">
+        <h3>{{ nomination.title }}</h3>
+        <p>{{ nomination.description|default:"Описание отсутствует" }}</p>
+        
+        <div class="stats">
+            <div class="stat">
+                <div class="stat-number">{{ nomination.votes.count }}</div>
+                <div>голосов</div>
+            </div>
+            <div class="stat">
+                <div class="stat-number">{{ nomination.get_average_rating|floatformat:1 }}</div>
+                <div>средний рейтинг</div>
+            </div>
+        </div>
+        
+        <div class="vote-form">
+            <h4>Проголосовать</h4>
+            <form method="post" action="{% url 'voting_app:nomination_vote' nomination.id %}">
+                {% csrf_token %}
+                <div class="form-group">
+                    <label for="rating_{{ nomination.id }}">Рейтинг (1-5):</label>
+                    <select id="rating_{{ nomination.id }}" name="rating" required>
+                        <option value="">---------</option>
+                        <option value="1">1</option>
+                        <option value="2">2</option>
+                        <option value="3">3</option>
+                        <option value="4">4</option>
+                        <option value="5">5</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="comment_{{ nomination.id }}">Комментарий (опционально):</label>
+                    <textarea id="comment_{{ nomination.id }}" name="comment" rows="2"></textarea>
+                </div>
+                <button type="submit" class="btn btn-success">Проголосовать</button>
+            </form>
+        </div>
+        
+        <div style="margin-top: 10px;">
+            <a href="{% url 'voting_app:nomination_delete' nomination.id %}" class="btn btn-danger btn-sm">Удалить</a>
+        </div>
+        
+        <p><small>Создана: {{ nomination.created_at|date:"d.m.Y H:i" }}</small></p>
+    </div>
+    {% empty %}
+    <div class="card">
+        <h3>Номинации не найдены</h3>
+        <p>В этой категории пока нет номинаций.</p>
+    </div>
+    {% endfor %}
+</div>
+{% endblock %}

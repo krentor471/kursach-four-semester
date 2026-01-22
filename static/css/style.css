@@ -1,0 +1,162 @@
+/* Минималистичные стили */
+
+body {
+    font-family: 'Arial', sans-serif;
+    background: #f5f6fa;
+    margin: 0;
+    padding: 20px;
+    color: #2f3640;
+}
+
+.container {
+    max-width: 1000px;
+    margin: 0 auto;
+    background: white;
+    border: 1px solid #ddd;
+    padding: 30px;
+}
+
+h1, h2, h3 {
+    color: #2f3640;
+    margin-bottom: 15px;
+    font-weight: 400;
+}
+
+h1 {
+    text-align: center;
+    font-size: 2em;
+    margin-bottom: 25px;
+    border-bottom: 2px solid #ff6b6b;
+    padding-bottom: 10px;
+}
+
+.card {
+    background: white;
+    border: 1px solid #ddd;
+    padding: 20px;
+    margin: 15px 0;
+    border-left: 3px solid #ff6b6b;
+}
+
+.card:hover {
+    border-left-color: #2f3640;
+}
+
+.btn {
+    background: #57606f;
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    text-decoration: none;
+    display: inline-block;
+    margin: 3px;
+    font-size: 14px;
+}
+
+.btn:hover {
+    background: #2f3640;
+}
+
+.btn-success {
+    background: #1dd1a1;
+}
+
+.btn-success:hover {
+    background: #10ac84;
+}
+
+.btn-danger {
+    background: #ff6b6b;
+}
+
+.btn-danger:hover {
+    background: #ee5a52;
+}
+
+.form-control {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ddd;
+    font-size: 14px;
+}
+
+.form-control:focus {
+    border-color: #ff6b6b;
+    outline: none;
+}
+
+.rating {
+    color: #feca57;
+    font-weight: bold;
+}
+
+.stats {
+    display: flex;
+    justify-content: space-around;
+    margin: 15px 0;
+    flex-wrap: wrap;
+}
+
+.stat-item {
+    text-align: center;
+    padding: 10px;
+    background: #f1f2f6;
+    border: 1px solid #ddd;
+    margin: 5px;
+    min-width: 100px;
+}
+
+.stat-number {
+    font-size: 1.5em;
+    font-weight: bold;
+    color: #ff6b6b;
+}
+
+.alert {
+    padding: 12px;
+    margin: 10px 0;
+    border: 1px solid;
+}
+
+.alert-success {
+    background: #d1f2eb;
+    border-color: #1dd1a1;
+    color: #0c5460;
+}
+
+.alert-error {
+    background: #fadbd8;
+    border-color: #ff6b6b;
+    color: #721c24;
+}
+
+.pagination {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin: 20px 0;
+    gap: 10px;
+}
+
+.current-page {
+    padding: 10px 15px;
+    background: #f1f2f6;
+    border: 1px solid #ddd;
+    font-weight: bold;
+    color: #2f3640;
+}
+
+@media (max-width: 768px) {
+    .container {
+        padding: 15px;
+        margin: 10px;
+    }
+    
+    .stats {
+        flex-direction: column;
+    }
+    
+    .pagination {
+        flex-wrap: wrap;
+    }
+}

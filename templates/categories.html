@@ -1,0 +1,44 @@
+{% extends 'base.html' %}
+
+{% block title %}Категории голосования{% endblock %}
+
+{% block content %}
+<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+    <h1>Категории голосования</h1>
+    <a href="{% url 'category_create' %}" class="btn btn-success">+ Добавить категорию</a>
+</div>
+
+<div class="grid">
+    {% for category in categories %}
+    <div class="card">
+        <h3>{{ category.name }}</h3>
+        <p>{{ category.description|default:"Описание отсутствует" }}</p>
+        
+        <div class="stats">
+            <div class="stat">
+                <div class="stat-number">{{ category.nominations.count }}</div>
+                <div>номинаций</div>
+            </div>
+            <div class="stat">
+                <div class="stat-number">{{ category.get_total_votes }}</div>
+                <div>голосов</div>
+            </div>
+        </div>
+        
+        <p><small>Создана: {{ category.created_at|date:"d.m.Y H:i" }}</small></p>
+        
+        <div style="margin-top: 15px;">
+            <a href="{% url 'category_detail' category.id %}" class="btn">Номинации</a>
+            <a href="{% url 'category_edit' category.id %}" class="btn btn-warning">Редактировать</a>
+            <a href="{% url 'category_delete' category.id %}" class="btn btn-danger">Удалить</a>
+        </div>
+    </div>
+    {% empty %}
+    <div class="card">
+        <h3>Категории не найдены</h3>
+        <p>Добавьте первую категорию для начала работы</p>
+        <a href="{% url 'category_create' %}" class="btn">Добавить категорию</a>
+    </div>
+    {% endfor %}
+</div>
+{% endblock %}

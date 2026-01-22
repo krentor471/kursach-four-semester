@@ -1,0 +1,38 @@
+{% extends 'base.html' %}
+
+{% block title %}Вход в систему{% endblock %}
+
+{% block content %}
+<div class="card" style="max-width: 400px; margin: 50px auto;">
+    <h2>Вход в систему</h2>
+    
+    {% if form.errors %}
+        <div style="color: red; margin: 10px 0;">
+            {{ form.errors }}
+        </div>
+    {% endif %}
+    
+    <form method="post">
+        {% csrf_token %}
+        
+        <div class="form-group">
+            <label for="{{ form.username.id_for_label }}">Имя пользователя:</label>
+            {{ form.username }}
+        </div>
+        
+        <div class="form-group">
+            <label for="{{ form.password.id_for_label }}">Пароль:</label>
+            {{ form.password }}
+        </div>
+        
+        <div class="form-group">
+            <button type="submit" class="btn btn-success">Войти</button>
+            <a href="/api/web/" class="btn" style="margin-left: 10px;">Отмена</a>
+        </div>
+    </form>
+    
+    <p style="margin-top: 20px; text-align: center;">
+        <small>Нет аккаунта? Обратитесь к администратору через <a href="/admin/">админку</a></small>
+    </p>
+</div>
+{% endblock %}

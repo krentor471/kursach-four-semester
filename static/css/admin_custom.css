@@ -1,0 +1,82 @@
+/* Минималистичные стили для админки */
+
+:root {
+    --dark-gray: #2f3640;
+    --medium-gray: #57606f;
+    --light-gray: #a4b0be;
+    --accent: #ff6b6b;
+    --success: #1dd1a1;
+    --warning: #feca57;
+}
+
+#header {
+    background: var(--dark-gray);
+    border-bottom: 2px solid var(--accent);
+}
+
+#branding h1 {
+    color: white;
+    font-weight: 400;
+}
+
+.module h2, .module caption {
+    background: var(--medium-gray);
+    color: white;
+    padding: 10px 15px;
+    font-weight: 400;
+}
+
+.results table {
+    border: 1px solid #ddd;
+}
+
+.results th {
+    background: var(--dark-gray);
+    color: white;
+    padding: 10px 8px;
+    font-weight: 400;
+}
+
+.results tr:nth-child(even) {
+    background-color: #f9f9f9;
+}
+
+.results tr:hover {
+    background-color: #f0f0f0;
+}
+
+.button, input[type=submit] {
+    background: var(--medium-gray);
+    border: none;
+    padding: 8px 16px;
+    color: white;
+}
+
+.button:hover, input[type=submit]:hover {
+    background: var(--dark-gray);
+}
+
+.button.default, input[type=submit].default {
+    background: var(--accent);
+}
+
+.field-nominations_count, .field-total_votes_display {
+    font-weight: bold;
+    color: var(--medium-gray);
+}
+
+.field-average_rating {
+    color: var(--warning);
+    font-weight: bold;
+}
+
+.field-category_link a, .field-nomination_link a {
+    color: var(--accent);
+    text-decoration: none;
+    padding: 2px 6px;
+}
+
+.field-category_link a:hover, .field-nomination_link a:hover {
+    background-color: var(--accent);
+    color: white;
+}

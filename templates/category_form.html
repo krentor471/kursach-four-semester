@@ -1,0 +1,33 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ title }} - Система голосования{% endblock %}
+
+{% block content %}
+<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+    <h1>{{ title }}</h1>
+    <a href="{% url 'voting_app:category_list' %}" class="btn">← Назад к категориям</a>
+</div>
+
+<div class="card" style="max-width: 600px;">
+    <form method="post">
+        {% csrf_token %}
+        
+        <div class="form-group">
+            <label for="name">Название категории:</label>
+            <input type="text" id="name" name="name" value="{{ category.name|default:'' }}" required>
+        </div>
+        
+        <div class="form-group">
+            <label for="description">Описание:</label>
+            <textarea id="description" name="description" rows="4">{{ category.description|default:'' }}</textarea>
+        </div>
+        
+        <div class="form-group">
+            <button type="submit" class="btn btn-success">
+                {% if category %}Сохранить изменения{% else %}Создать категорию{% endif %}
+            </button>
+            <a href="{% url 'voting_app:category_list' %}" class="btn" style="margin-left: 10px;">Отмена</a>
+        </div>
+    </form>
+</div>
+{% endblock %}

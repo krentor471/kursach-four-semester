@@ -1,0 +1,33 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ title }} - Система голосования{% endblock %}
+
+{% block content %}
+<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+    <h1>{{ title }}</h1>
+    <a href="{% url 'voting_app:category_detail' category.id %}" class="btn">← Назад к номинациям</a>
+</div>
+
+<div class="card" style="max-width: 600px;">
+    <h3>Категория: {{ category.name }}</h3>
+    
+    <form method="post">
+        {% csrf_token %}
+        
+        <div class="form-group">
+            <label for="title">Название номинации:</label>
+            <input type="text" id="title" name="title" required>
+        </div>
+        
+        <div class="form-group">
+            <label for="description">Описание:</label>
+            <textarea id="description" name="description" rows="4"></textarea>
+        </div>
+        
+        <div class="form-group">
+            <button type="submit" class="btn btn-success">Создать номинацию</button>
+            <a href="{% url 'voting_app:category_detail' category.id %}" class="btn" style="margin-left: 10px;">Отмена</a>
+        </div>
+    </form>
+</div>
+{% endblock %}

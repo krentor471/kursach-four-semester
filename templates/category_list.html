@@ -1,0 +1,62 @@
+{% extends 'base.html' %}
+
+{% block title %}Категории голосования{% endblock %}
+
+{% block content %}
+<div class="stats">
+    <div class="stat-item">
+        <div class="stat-number">{{ page_obj.paginator.count }}</div>
+        <div>Категорий</div>
+    </div>
+</div>
+
+{% for category in categories %}
+<div class="card">
+    <h3>{{ category.name }}</h3>
+    <p>{{ category.description|default:"Описание отсутствует" }}</p>
+    
+    <div class="stats">
+        <div class="stat-item">
+            <div class="stat-number">{{ category.nominations.count }}</div>
+            <div>Номинаций</div>
+        </div>
+        <div class="stat-item">
+            <div class="stat-number">{{ category.get_total_votes }}</div>
+            <div>Голосов</div>
+        </div>
+    </div>
+    
+    <p><small>Создана: {{ category.created_at|date:"d.m.Y H:i" }}</small></p>
+    
+    <div style="margin-top: 15px;">
+        <a href="{% url 'voting_app:category_detail' category.id %}" class="btn">Номинации</a>
+        <a href="{% url 'voting_app:category_edit' category.id %}" class="btn btn-success">Редактировать</a>
+        <a href="{% url 'voting_app:category_delete' category.id %}" class="btn btn-danger">Удалить</a>
+    </div>
+</div>
+{% empty %}
+<div class="card">
+    <h3>Категории не найдены</h3>
+    <p>Добавьте первую категорию для начала работы</p>
+    <a href="{% url 'voting_app:category_create' %}" class="btn">Добавить категорию</a>
+</div>
+{% endfor %}
+
+{% if page_obj.has_other_pages %}
+<div class="pagination">
+    {% if page_obj.has_previous %}
+        <a href="?page=1" class="btn">Первая</a>
+        <a href="?page={{ page_obj.previous_page_number }}" class="btn">Предыдущая</a>
+    {% endif %}
+    
+    <span class="current-page">
+        Страница {{ page_obj.number }} из {{ page_obj.paginator.num_pages }}
+    </span>
+    
+    {% if page_obj.has_next %}
+        <a href="?page={{ page_obj.next_page_number }}" class="btn">Следующая</a>
+        <a href="?page={{ page_obj.paginator.num_pages }}" class="btn">Последняя</a>
+    {% endif %}
+</div>
+{% endif %}
+{% endblock %}
