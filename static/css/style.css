@@ -38,6 +38,64 @@ h1 {
     border-left: 3px solid #ff6b6b;
 }
 
+.narrow {
+    max-width: 640px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.top-nav,
+.actions,
+.page-header,
+.section-title {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.top-nav {
+    justify-content: center;
+    margin-bottom: 30px;
+    border-bottom: 1px solid #ddd;
+    padding-bottom: 15px;
+}
+
+.page-header,
+.section-title {
+    justify-content: space-between;
+    margin-bottom: 20px;
+}
+
+.user-label,
+.hint {
+    color: #57606f;
+    font-size: 14px;
+}
+
+.inline-form {
+    display: inline;
+    margin: 0;
+}
+
+.grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 16px;
+}
+
+.nomination-item {
+    border: 1px solid #ddd;
+    padding: 18px;
+    background: #fff;
+}
+
+.vote-form {
+    border-top: 1px solid #eee;
+    margin-top: 16px;
+    padding-top: 12px;
+}
+
 .card:hover {
     border-left-color: #2f3640;
 }
@@ -83,6 +141,38 @@ h1 {
 .form-control:focus {
     border-color: #ff6b6b;
     outline: none;
+}
+
+.form-group {
+    margin-bottom: 15px;
+}
+
+label {
+    display: block;
+    margin-bottom: 6px;
+    font-weight: bold;
+}
+
+input,
+select,
+textarea {
+    width: 100%;
+    box-sizing: border-box;
+    padding: 10px;
+    border: 1px solid #ddd;
+    font-size: 14px;
+    font-family: inherit;
+}
+
+.checkbox-group label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-weight: normal;
+}
+
+.checkbox-group input {
+    width: auto;
 }
 
 .rating {

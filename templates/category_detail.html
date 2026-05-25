@@ -1,20 +1,28 @@
 {% extends 'base.html' %}
 
-{% block title %}{{ category.name }} - Система голосования{% endblock %}
+{% block title %}{{ category.name }} - Система онлайн-голосования{% endblock %}
 
 {% block content %}
-<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+<div class="page-header">
     <div>
-        <h1>{{ category.name }}</h1>
+        <h2>{{ category.name }}</h2>
         <p>{{ category.description|default:"Описание отсутствует" }}</p>
+        <p>
+            <small>
+                Статус: {% if category.is_active %}активна{% else %}неактивна{% endif %}
+                {% if category.is_featured %} / рекомендуемая{% endif %}
+            </small>
+        </p>
     </div>
-    <div>
-        <a href="{% url 'voting_app:category_list' %}" class="btn">← Назад к категориям</a>
-        <a href="{% url 'voting_app:category_edit' category.id %}" class="btn btn-warning">Редактировать</a>
+    <div class="actions">
+        <a href="{% url 'voting_app:category_list' %}" class="btn">Назад</a>
+        {% if can_manage_voting %}
+            <a href="{% url 'voting_app:category_edit' category.id %}" class="btn btn-warning">Редактировать</a>
+        {% endif %}
     </div>
 </div>
 
-<div class="stats" style="margin-bottom: 30px;">
+<div class="stats">
     <div class="stat">
         <div class="stat-number">{{ nominations.count }}</div>
         <div>номинаций</div>
@@ -25,21 +33,48 @@
     </div>
 </div>
 
-<h2>Номинации</h2>
-
-<div style="margin-bottom: 20px;">
-    <a href="{% url 'voting_app:nomination_create' category.id %}" class="btn btn-success">+ Добавить номинацию</a>
+<div class="section-title">
+    <h2>Номинации</h2>
+    {% if can_manage_voting %}
+        <a href="{% url 'voting_app:nomination_create' category.id %}" class="btn btn-success">Добавить номинацию</a>
+    {% endif %}
 </div>
+
+{% if can_manage_voting %}
+<div class="card">
+    <h3>Контроль голосований</h3>
+    <div class="actions">
+        <a href="/api/categories/popular/" class="btn">Популярные категории</a>
+        <a href="/api/nominations/open_now/" class="btn">Активные голосования</a>
+        <a href="/api/nominations/top_rated/" class="btn">Топ по рейтингу</a>
+    </div>
+</div>
+{% endif %}
 
 <div class="grid">
     {% for nomination in nominations %}
     <div class="nomination-item">
         <h3>{{ nomination.title }}</h3>
         <p>{{ nomination.description|default:"Описание отсутствует" }}</p>
-        
+        <p><small>Голосование: {{ nomination.voting_start|date:"d.m.Y H:i" }} - {{ nomination.voting_end|date:"d.m.Y H:i" }}</small></p>
+        <p>
+            <small>
+                Статус:
+                {% if nomination.is_voting_open %}
+                    открыто
+                {% elif not nomination.is_active %}
+                    номинация выключена
+                {% elif not category.is_active %}
+                    категория выключена
+                {% else %}
+                    закрыто по срокам
+                {% endif %}
+            </small>
+        </p>
+
         <div class="stats">
             <div class="stat">
-                <div class="stat-number">{{ nomination.votes.count }}</div>
+                <div class="stat-number">{{ nomination.get_votes_count }}</div>
                 <div>голосов</div>
             </div>
             <div class="stat">
@@ -47,35 +82,44 @@
                 <div>средний рейтинг</div>
             </div>
         </div>
-        
-        <div class="vote-form">
-            <h4>Проголосовать</h4>
-            <form method="post" action="{% url 'voting_app:nomination_vote' nomination.id %}">
-                {% csrf_token %}
-                <div class="form-group">
-                    <label for="rating_{{ nomination.id }}">Рейтинг (1-5):</label>
-                    <select id="rating_{{ nomination.id }}" name="rating" required>
-                        <option value="">---------</option>
-                        <option value="1">1</option>
-                        <option value="2">2</option>
-                        <option value="3">3</option>
-                        <option value="4">4</option>
-                        <option value="5">5</option>
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label for="comment_{{ nomination.id }}">Комментарий (опционально):</label>
-                    <textarea id="comment_{{ nomination.id }}" name="comment" rows="2"></textarea>
-                </div>
-                <button type="submit" class="btn btn-success">Проголосовать</button>
-            </form>
-        </div>
-        
-        <div style="margin-top: 10px;">
-            <a href="{% url 'voting_app:nomination_delete' nomination.id %}" class="btn btn-danger btn-sm">Удалить</a>
-        </div>
-        
-        <p><small>Создана: {{ nomination.created_at|date:"d.m.Y H:i" }}</small></p>
+
+        {% if user.is_authenticated and nomination.is_voting_open %}
+            <div class="vote-form">
+                <h4>Проголосовать</h4>
+                <form method="post" action="{% url 'voting_app:nomination_vote' nomination.id %}">
+                    {% csrf_token %}
+                    <div class="form-group">
+                        <label for="rating_{{ nomination.id }}">Рейтинг</label>
+                        <select id="rating_{{ nomination.id }}" name="rating" required>
+                            <option value="">Выберите оценку</option>
+                            <option value="1">1</option>
+                            <option value="2">2</option>
+                            <option value="3">3</option>
+                            <option value="4">4</option>
+                            <option value="5">5</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="comment_{{ nomination.id }}">Комментарий</label>
+                        <textarea id="comment_{{ nomination.id }}" name="comment" rows="2"></textarea>
+                    </div>
+                    <button type="submit" class="btn btn-success">Отправить голос</button>
+                </form>
+            </div>
+        {% else %}
+            {% if user.is_authenticated %}
+                <p class="hint">Голосование сейчас недоступно.</p>
+            {% else %}
+                <p><a href="/accounts/login/">Войдите</a>, чтобы проголосовать.</p>
+            {% endif %}
+        {% endif %}
+
+        {% if can_manage_voting %}
+            <div class="actions">
+                <a href="{% url 'voting_app:nomination_edit' nomination.id %}" class="btn btn-warning btn-sm">Редактировать</a>
+                <a href="{% url 'voting_app:nomination_delete' nomination.id %}" class="btn btn-danger btn-sm">Удалить</a>
+            </div>
+        {% endif %}
     </div>
     {% empty %}
     <div class="card">

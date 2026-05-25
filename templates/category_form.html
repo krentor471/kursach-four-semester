@@ -1,33 +1,48 @@
 {% extends 'base.html' %}
 
-{% block title %}{{ title }} - Система голосования{% endblock %}
+{% block title %}{{ title }} - Система онлайн-голосования{% endblock %}
 
 {% block content %}
-<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-    <h1>{{ title }}</h1>
-    <a href="{% url 'voting_app:category_list' %}" class="btn">← Назад к категориям</a>
+<div class="page-header">
+    <h2>{{ title }}</h2>
+    <a href="{% url 'voting_app:category_list' %}" class="btn">Назад</a>
 </div>
 
-<div class="card" style="max-width: 600px;">
+<div class="card narrow">
     <form method="post">
         {% csrf_token %}
-        
         <div class="form-group">
-            <label for="name">Название категории:</label>
+            <label for="name">Название категории</label>
             <input type="text" id="name" name="name" value="{{ category.name|default:'' }}" required>
         </div>
-        
         <div class="form-group">
-            <label for="description">Описание:</label>
+            <label for="description">Описание</label>
             <textarea id="description" name="description" rows="4">{{ category.description|default:'' }}</textarea>
         </div>
-        
-        <div class="form-group">
-            <button type="submit" class="btn btn-success">
-                {% if category %}Сохранить изменения{% else %}Создать категорию{% endif %}
-            </button>
-            <a href="{% url 'voting_app:category_list' %}" class="btn" style="margin-left: 10px;">Отмена</a>
+        <div class="form-group checkbox-group">
+            <label>
+                <input type="checkbox" name="is_active" {% if not category or category.is_active %}checked{% endif %}>
+                Категория активна
+            </label>
         </div>
+        <div class="form-group checkbox-group">
+            <label>
+                <input type="checkbox" name="is_featured" {% if category.is_featured %}checked{% endif %}>
+                Рекомендуемая категория
+            </label>
+        </div>
+        <div class="form-group">
+            <label for="priority">Приоритет</label>
+            <input type="number" id="priority" name="priority" min="0" max="100" value="{{ category.priority|default:0 }}">
+        </div>
+        <div class="form-group">
+            <label for="color">Цвет</label>
+            <input type="text" id="color" name="color" value="{{ category.color|default:'#0078d4' }}" placeholder="#0078d4">
+        </div>
+        <button type="submit" class="btn btn-success">
+            {% if category %}Сохранить{% else %}Создать{% endif %}
+        </button>
+        <a href="{% url 'voting_app:category_list' %}" class="btn">Отмена</a>
     </form>
 </div>
 {% endblock %}

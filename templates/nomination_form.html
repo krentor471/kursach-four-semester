@@ -1,33 +1,41 @@
 {% extends 'base.html' %}
 
-{% block title %}{{ title }} - Система голосования{% endblock %}
+{% block title %}{{ title }} - Система онлайн-голосования{% endblock %}
 
 {% block content %}
-<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-    <h1>{{ title }}</h1>
-    <a href="{% url 'voting_app:category_detail' category.id %}" class="btn">← Назад к номинациям</a>
+<div class="page-header">
+    <h2>{{ title }}</h2>
+    <a href="{% url 'voting_app:category_detail' category.id %}" class="btn">Назад</a>
 </div>
 
-<div class="card" style="max-width: 600px;">
+<div class="card narrow">
     <h3>Категория: {{ category.name }}</h3>
-    
     <form method="post">
         {% csrf_token %}
-        
         <div class="form-group">
-            <label for="title">Название номинации:</label>
-            <input type="text" id="title" name="title" required>
+            <label for="title">Название номинации</label>
+            <input type="text" id="title" name="title" value="{{ nomination.title|default:'' }}" required>
         </div>
-        
         <div class="form-group">
-            <label for="description">Описание:</label>
-            <textarea id="description" name="description" rows="4"></textarea>
+            <label for="description">Описание</label>
+            <textarea id="description" name="description" rows="4">{{ nomination.description|default:'' }}</textarea>
         </div>
-        
         <div class="form-group">
-            <button type="submit" class="btn btn-success">Создать номинацию</button>
-            <a href="{% url 'voting_app:category_detail' category.id %}" class="btn" style="margin-left: 10px;">Отмена</a>
+            <label for="voting_start">Начало голосования</label>
+            <input type="datetime-local" id="voting_start" name="voting_start" value="{{ voting_start_value }}">
         </div>
+        <div class="form-group">
+            <label for="voting_end">Окончание голосования</label>
+            <input type="datetime-local" id="voting_end" name="voting_end" value="{{ voting_end_value }}">
+        </div>
+        <div class="form-group checkbox-group">
+            <label>
+                <input type="checkbox" name="is_active" {% if not nomination or nomination.is_active %}checked{% endif %}>
+                Номинация активна
+            </label>
+        </div>
+        <button type="submit" class="btn btn-success">{% if nomination %}Сохранить{% else %}Создать{% endif %}</button>
+        <a href="{% url 'voting_app:category_detail' category.id %}" class="btn">Отмена</a>
     </form>
 </div>
 {% endblock %}

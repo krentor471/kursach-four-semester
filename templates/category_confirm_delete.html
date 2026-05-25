@@ -1,35 +1,15 @@
 {% extends 'base.html' %}
 
-{% block title %}Удалить категорию - Система голосования{% endblock %}
+{% block title %}Удалить категорию{% endblock %}
 
 {% block content %}
-<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-    <h1>Удалить категорию</h1>
-    <a href="{% url 'voting_app:category_list' %}" class="btn">← Назад к категориям</a>
-</div>
-
-<div class="card" style="max-width: 600px;">
-    <h2>Вы уверены, что хотите удалить категорию "{{ category.name }}"?</h2>
-    
-    <p><strong>Внимание:</strong> Это действие нельзя отменить. Все номинации и голоса в этой категории также будут удалены.</p>
-    
-    <div style="margin-top: 20px;">
-        <div class="stats">
-            <div class="stat">
-                <div class="stat-number">{{ category.nominations.count }}</div>
-                <div>номинаций будет удалено</div>
-            </div>
-            <div class="stat">
-                <div class="stat-number">{{ category.get_total_votes }}</div>
-                <div>голосов будет потеряно</div>
-            </div>
-        </div>
-    </div>
-    
-    <form method="post" style="margin-top: 30px;">
+<div class="card narrow">
+    <h2>Удалить категорию "{{ category.name }}"?</h2>
+    <p>Удаление разрешено только для категорий без номинаций.</p>
+    <form method="post">
         {% csrf_token %}
-        <button type="submit" class="btn btn-danger">Да, удалить категорию</button>
-        <a href="{% url 'voting_app:category_list' %}" class="btn" style="margin-left: 10px;">Отмена</a>
+        <button type="submit" class="btn btn-danger">Удалить</button>
+        <a href="{% url 'voting_app:category_list' %}" class="btn">Отмена</a>
     </form>
 </div>
 {% endblock %}

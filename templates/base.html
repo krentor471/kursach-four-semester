@@ -3,35 +3,40 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>{% block title %}Система голосования{% endblock %}</title>
+    <title>{% block title %}Система онлайн-голосования{% endblock %}</title>
     {% load static %}
     <link rel="stylesheet" href="{% static 'css/style.css' %}">
 </head>
 <body>
     <div class="container">
-        <h1>Система голосования</h1>
-        
-        <nav style="text-align: center; margin-bottom: 30px; border-bottom: 1px solid #ddd; padding-bottom: 15px;">
+        <h1>Система онлайн-голосования</h1>
+
+        <nav class="top-nav">
             <a href="/api/web/" class="btn">Категории</a>
-            <a href="/api/web/category/create/" class="btn btn-success">Добавить</a>
+            {% if can_manage_voting %}
+                <a href="/api/web/category/create/" class="btn btn-success">Добавить категорию</a>
+            {% endif %}
             <a href="/admin/" class="btn">Админка</a>
             <a href="/api/" class="btn">API</a>
+            <a href="/silk/" class="btn">Silk</a>
             {% if user.is_authenticated %}
-                <span style="margin: 0 10px; color: #2f3640;">Пользователь: {{ user.username }}</span>
-                <a href="/accounts/logout/" class="btn btn-danger">Выход</a>
+                <span class="user-label">Пользователь: {{ user.username }}</span>
+                <form method="post" action="/accounts/logout/" class="inline-form">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-danger">Выход</button>
+                </form>
             {% else %}
                 <a href="/accounts/login/" class="btn">Вход</a>
+                <a href="{% url 'social:begin' 'github' %}" class="btn">GitHub OAuth2</a>
             {% endif %}
         </nav>
-        
+
         {% if messages %}
             {% for message in messages %}
-                <div class="alert alert-{{ message.tags }}">
-                    {{ message }}
-                </div>
+                <div class="alert alert-{{ message.tags }}">{{ message }}</div>
             {% endfor %}
         {% endif %}
-        
+
         {% block content %}{% endblock %}
     </div>
 </body>
