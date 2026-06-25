@@ -1,5 +1,7 @@
 from rest_framework.permissions import SAFE_METHODS, BasePermission
 
+from .auth_utils import can_manage_voting
+
 
 class IsModeratorOrReadOnly(BasePermission):
     """Разрешает чтение всем авторизованным, изменение - модераторам и админам."""
@@ -10,7 +12,7 @@ class IsModeratorOrReadOnly(BasePermission):
         return bool(
             request.user
             and request.user.is_authenticated
-            and (request.user.is_staff or request.user.groups.filter(name="moderator").exists())
+            and can_manage_voting(request.user)
         )
 
 

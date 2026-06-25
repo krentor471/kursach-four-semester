@@ -10,7 +10,7 @@ from .models import Nomination, Vote
 @transaction.atomic
 def cast_vote(
     *,
-    nomination: Nomination,
+    nomination: Nomination | int,
     user: User,
     rating: int,
     comment: str = "",
@@ -24,16 +24,35 @@ def cast_vote(
         rating: Оценка от 1 до 5.
         comment: Необязательный комментарий.
     """
+    nomination_pk = nomination if isinstance(nomination, int) else nomination.pk
     locked_nomination = (
         Nomination.objects.select_for_update()
         .select_related("category")
-        .get(pk=nomination.pk)
+        .get(pk=nomination_pk)
     )
-    vote, created = Vote.objects.update_or_create(
-        nomination=locked_nomination,
-        user=user,
-        defaults={"rating": rating, "comment": comment},
-    )
+    rating = int(rating)
+    if not 1 <= rating <= 5:
+        raise ValidationError({"rating": "Рейтинг должен быть от 1 до 5."})
+    if len(comment) > 1000:
+        raise ValidationError({"comment": "Комментарий не может быть длиннее 1000 символов."})
+    if not locked_nomination.is_voting_open():
+        raise ValidationError({"nomination": "Голосование закрыто или номинация неактивна."})
+
+    vote = Vote.objects.filter(nomination=locked_nomination, user=user).first()
+    created = vote is None
+    if created:
+        vote = Vote(
+            nomination=locked_nomination,
+            user=user,
+            rating=rating,
+            comment=comment,
+        )
+        vote.save(skip_full_clean=True)
+    else:
+        vote.nomination = locked_nomination
+        vote.rating = rating
+        vote.comment = comment
+        vote.save(update_fields=["rating", "comment"], skip_full_clean=True)
     return vote, created
 
 

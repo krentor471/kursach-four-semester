@@ -3,22 +3,21 @@ from datetime import timedelta
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.core.exceptions import ValidationError
+from django.http import Http404
 from django.core.paginator import Paginator
 from django.db.models import Avg, Count
 from django.shortcuts import get_object_or_404, redirect, render
 from django.utils import timezone
 from django.utils.dateparse import parse_datetime
 
+from .auth_utils import can_manage_voting
 from .models import Category, Nomination
 from .services import cast_vote
 
 
 def is_moderator(user) -> bool:
     """Проверяет права модератора для веб-форм."""
-    return bool(
-        user.is_authenticated
-        and (user.is_staff or user.groups.filter(name="moderator").exists())
-    )
+    return can_manage_voting(user)
 
 
 def parse_form_datetime(value: str, fallback):
@@ -41,8 +40,7 @@ def datetime_local_value(value) -> str:
 def category_list(request):
     """Показывает список категорий с агрегированной статистикой."""
     categories = (
-        Category.objects.prefetch_related("nominations", "nominations__votes")
-        .annotate(
+        Category.objects.annotate(
             nominations_count=Count("nominations", distinct=True),
             total_votes=Count("nominations__votes", distinct=True),
         )
@@ -55,10 +53,15 @@ def category_list(request):
 
 def category_detail(request, pk: int):
     """Показывает категорию и ее номинации."""
-    category = get_object_or_404(Category, pk=pk)
+    category = get_object_or_404(
+        Category.objects.annotate(
+            nominations_count=Count("nominations", distinct=True),
+            total_votes=Count("nominations__votes", distinct=True),
+        ),
+        pk=pk,
+    )
     nominations = (
         category.nominations.select_related("category")
-        .prefetch_related("votes")
         .annotate(votes_count=Count("votes", distinct=True), average_rating=Avg("votes__rating"))
     )
     return render(
@@ -132,24 +135,29 @@ def category_delete(request, pk: int):
 @login_required
 def nomination_vote(request, pk: int):
     """Принимает голос пользователя из веб-формы."""
-    nomination = get_object_or_404(
-        Nomination.objects.select_related("category"),
-        pk=pk,
-    )
+    category_pk = None
     if request.method == "POST":
         try:
             vote, created = cast_vote(
-                nomination=nomination,
+                nomination=pk,
                 user=request.user,
                 rating=int(request.POST.get("rating", 0)),
                 comment=request.POST.get("comment", ""),
             )
+            category_pk = vote.nomination.category.pk
+        except Nomination.DoesNotExist as error:
+            raise Http404("Nomination not found") from error
         except (ValueError, ValidationError) as error:
             messages.error(request, f"Голос не принят: {error}")
         else:
             action = "принят" if created else "обновлен"
             messages.success(request, f"Ваш голос за \"{vote.nomination.title}\" {action}.")
-    return redirect("voting_app:category_detail", pk=nomination.category.pk)
+    if category_pk is None:
+        category_pk = get_object_or_404(
+            Nomination.objects.only("category_id"),
+            pk=pk,
+        ).category_id
+    return redirect("voting_app:category_detail", pk=category_pk)
 
 
 @user_passes_test(is_moderator)
@@ -225,7 +233,7 @@ def nomination_edit(request, pk: int):
 @user_passes_test(is_moderator)
 def nomination_delete(request, pk: int):
     """Удаляет номинацию, если за нее еще не голосовали."""
-    nomination = get_object_or_404(Nomination, pk=pk)
+    nomination = get_object_or_404(Nomination.objects.select_related("category"), pk=pk)
     category_pk = nomination.category.pk
     if request.method == "POST":
         if nomination.votes.exists():

@@ -237,5 +237,7 @@ class Vote(models.Model):
 
     def save(self, *args: Any, **kwargs: Any) -> None:
         """Запускает полную серверную валидацию перед записью голоса."""
-        self.full_clean()
+        skip_full_clean = kwargs.pop("skip_full_clean", False)
+        if not skip_full_clean:
+            self.full_clean()
         super().save(*args, **kwargs)

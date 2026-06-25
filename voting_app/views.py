@@ -9,6 +9,7 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
 from .filters import CategoryFilter, NominationFilter, VoteFilter
+from .auth_utils import get_user_role
 from .models import Category, Nomination, Vote
 from .permissions import IsModeratorOrReadOnly, IsOwnerOrAdmin
 from .serializers import CategorySerializer, NominationSerializer, VoteSerializer
@@ -28,8 +29,7 @@ class CategoryViewSet(viewsets.ModelViewSet):
     def get_queryset(self):
         """Возвращает категории с аннотациями, чтобы не считать статистику в цикле."""
         return (
-            Category.objects.prefetch_related("nominations", "nominations__votes")
-            .annotate(
+            Category.objects.annotate(
                 nominations_count=Count("nominations", distinct=True),
                 total_votes=Count("nominations__votes", distinct=True),
                 average_rating=Avg("nominations__votes__rating"),
@@ -40,14 +40,7 @@ class CategoryViewSet(viewsets.ModelViewSet):
     def get_serializer_context(self) -> dict:
         """Передает в сериализатор роль пользователя через context."""
         context = super().get_serializer_context()
-        user = self.request.user
-        if user.is_staff:
-            role = "admin"
-        elif user.groups.filter(name="moderator").exists():
-            role = "moderator"
-        else:
-            role = "voter"
-        context["user_role"] = role
+        context["user_role"] = get_user_role(self.request.user)
         return context
 
     def destroy(self, request, *args, **kwargs):
@@ -114,7 +107,6 @@ class NominationViewSet(viewsets.ModelViewSet):
         """Возвращает номинации с select_related и агрегированной статистикой."""
         queryset = (
             Nomination.objects.select_related("category")
-            .prefetch_related("votes", "votes__user")
             .annotate(
                 votes_count=Count("votes", distinct=True),
                 average_rating=Avg("votes__rating"),

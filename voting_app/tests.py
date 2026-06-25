@@ -17,7 +17,7 @@ from .tasks import close_expired_nominations, send_voting_ending_soon_emails
 def create_nomination(category: Category, **kwargs) -> Nomination:
     """Создает номинацию с открытым периодом голосования."""
     defaults = {
-        "title": "Лучший проект",
+        "title": "Какой-то проект",
         "description": "Описание",
         "category": category,
         "voting_start": timezone.now() - timedelta(hours=1),
@@ -103,7 +103,7 @@ class VotingApiTests(APITestCase):
 
     def test_anonymous_user_cannot_read_api(self) -> None:
         response = self.client.get(reverse("voting_app:category-list"))
-        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
 
     def test_voter_can_read_category_statistics(self) -> None:
         self.client.force_authenticate(self.voter)
